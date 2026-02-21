@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  my-next-backend:
+    image: backend:1.0
+    container_name: backend-server
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - MONGODB_URI=mongodb+srv://thananonza123_db_user:3OTBsAvDZ3yl5EsK@cluster0.h7qceit.mongodb.net/?appName=Cluster0
+      - JWT_SECRET=myjwtsecret_change_this_in_production_2026
+    volumes:
+      - profile-images:/app/public/profile-images
+
+  my-react-frontend:
+    image: frontend:1.0
+    container_name: frontend-server
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  nginx:
+    image: jonasal/nginx-certbot:latest
+    restart: unless-stopped
+    environment:
+      - CERTBOT_EMAIL=your-email@example.com
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - nginx_secrets:/etc/letsencrypt
+      - ./user_conf.d:/etc/nginx/user_conf.d
+      - profile-images:/var/www/html/public/profile-images
+      - ./nginx-certbot.env:/etc/nginx/nginx-certbot.env
+    depends_on:
+      - my-next-backend
+      - my-react-frontend
+
+volumes:
+  nginx_secrets:
+  profile-images:
